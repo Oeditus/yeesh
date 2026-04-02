@@ -96,7 +96,6 @@ defmodule Yeesh.MixProject do
       files: ~w(
         lib
         assets
-        priv
         .formatter.exs
         mix.exs
         README.md
