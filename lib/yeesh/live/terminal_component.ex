@@ -101,8 +101,8 @@ defmodule Yeesh.Live.TerminalComponent do
 
       socket =
         socket
-        |> push_event("yeesh:output", %{output: output})
         |> push_event("yeesh:prompt", %{prompt: prompt})
+        |> push_event("yeesh:output", %{output: output})
 
       {:noreply, socket}
     else
