@@ -46,6 +46,14 @@ let liveSocket = new LiveSocket("/live", Socket, {
 })
 ```
 
+The hook imports `@xterm/xterm/css/xterm.css`, which esbuild extracts into a
+separate CSS bundle alongside your `app.js` output. Add a second stylesheet
+link in your `root.html.heex` to load it:
+
+```html
+<link phx-track-static rel="stylesheet" href={~p"/assets/js/app.css"} />
+```
+
 ## Quick Start
 
 Add the terminal component to any LiveView:

@@ -82,6 +82,7 @@ defmodule Yeesh.Live.TerminalComponent do
     <div
       id={@id}
       phx-hook="YeeshTerminal"
+      phx-update="ignore"
       phx-target={@myself}
       data-theme={@theme}
       data-prompt={get_prompt(assigns)}
