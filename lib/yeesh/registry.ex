@@ -82,7 +82,13 @@ defmodule Yeesh.Registry do
   @impl true
   def init(_opts) do
     table = :ets.new(@table, [:named_table, :set, :public, read_concurrency: true])
-    register_all(@builtin_commands)
+    register_all(@builtin_commands ++ mix_commands())
     {:ok, table}
+  end
+
+  defp mix_commands do
+    if Code.ensure_loaded?(Yeesh.Builtin.MixTask),
+      do: [Yeesh.Builtin.MixTask],
+      else: []
   end
 end

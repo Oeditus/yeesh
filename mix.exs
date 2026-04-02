@@ -115,7 +115,7 @@ defmodule Yeesh.MixProject do
       main: "readme",
       logo: "stuff/img/logo-48x48.jpg",
       assets: %{"stuff/img" => "assets"},
-      extras: ["README.md"],
+      extras: ["README.md", "stuff/mix_tasks.md"],
       extra_section: "GUIDES",
       source_url: @source_url,
       source_ref: "v#{@version}",
@@ -151,7 +151,14 @@ defmodule Yeesh.MixProject do
         Yeesh.Builtin.ElixirEval,
         Yeesh.Builtin.Env,
         Yeesh.Builtin.Help,
-        Yeesh.Builtin.History
+        Yeesh.Builtin.History,
+        Yeesh.Builtin.MixTask
+      ],
+      "Mix Integration": [
+        Yeesh.IOServer,
+        Yeesh.MixRunner,
+        Yeesh.MixShell,
+        Yeesh.MixCommand
       ],
       Utilities: [
         Yeesh.Completion,

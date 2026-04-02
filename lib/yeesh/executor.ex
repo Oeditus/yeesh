@@ -11,7 +11,7 @@ defmodule Yeesh.Executor do
   OS command passthrough is planned for Milestone 2.
   """
 
-  alias Yeesh.{Output, Registry, Sandbox, Session}
+  alias Yeesh.{IOServer, Output, Registry, Sandbox, Session}
 
   @doc """
   Executes a command line in the context of the given session.
@@ -30,6 +30,7 @@ defmodule Yeesh.Executor do
 
       case session.mode do
         :elixir_repl -> execute_elixir_repl(input, session, session_pid)
+        :mix_task -> execute_mix_task(input, session, session_pid)
         :normal -> execute_normal(input, session, session_pid)
       end
     end
@@ -68,6 +69,77 @@ defmodule Yeesh.Executor do
     parts = if stdio != "", do: parts ++ [stdio], else: parts
     parts = parts ++ [Output.cyan(inspected)]
     Enum.join(parts, "")
+  end
+
+  # -- Mix task mode -----------------------------------------------------------
+
+  defp execute_mix_task("exit", session, session_pid) do
+    cleanup_mix_task(session, session_pid)
+  end
+
+  defp execute_mix_task(input, session, session_pid) do
+    io_server = session.context[:mix_io_server]
+
+    if io_server && Process.alive?(io_server) do
+      forward_to_mix_task(io_server, input, session, session_pid)
+    else
+      cleanup_mix_task(session, session_pid)
+    end
+  rescue
+    _ -> cleanup_mix_task(session, session_pid)
+  end
+
+  defp forward_to_mix_task(io_server, input, session, session_pid) do
+    case IOServer.provide_input_and_wait(io_server, input) do
+      {output, :waiting, prompt} ->
+        new_session =
+          Session.update(session_pid, fn s ->
+            %{s | context: Map.put(s.context, :mix_prompt, prompt)}
+          end)
+
+        {output, new_session}
+
+      {output, :done} ->
+        {done_output, new_session} = cleanup_mix_task(session, session_pid)
+        {output <> done_output, new_session}
+    end
+  end
+
+  defp cleanup_mix_task(session, session_pid) do
+    io_server = session.context[:mix_io_server]
+    task_pid = session.context[:mix_task_pid]
+    original_shell = session.context[:mix_original_shell]
+
+    # Kill the task if still alive
+    if task_pid && Process.alive?(task_pid) do
+      Process.exit(task_pid, :kill)
+    end
+
+    # Clean up IOServer
+    if io_server && Process.alive?(io_server) do
+      IOServer.stop(io_server)
+    end
+
+    # Restore Mix.shell if Mix is available
+    if Code.ensure_loaded?(Mix) && original_shell do
+      Mix.shell(original_shell)
+    end
+
+    new_session =
+      Session.update(session_pid, fn s ->
+        %{
+          s
+          | mode: :normal,
+            context:
+              s.context
+              |> Map.delete(:mix_io_server)
+              |> Map.delete(:mix_task_pid)
+              |> Map.delete(:mix_prompt)
+              |> Map.delete(:mix_original_shell)
+        }
+      end)
+
+    {"", new_session}
   end
 
   defp dispatch(command_name, args, session, session_pid) do

@@ -18,7 +18,7 @@ defmodule Yeesh.Session do
           env: %{String.t() => String.t()},
           cwd: String.t(),
           prompt: String.t(),
-          mode: :normal | :elixir_repl,
+          mode: :normal | :elixir_repl | :mix_task,
           dune_session: Sandbox.dune_state(),
           context: map(),
           started_at: DateTime.t()
@@ -98,7 +98,7 @@ defmodule Yeesh.Session do
   end
 
   @doc "Gets the current mode."
-  @spec get_mode(pid()) :: :normal | :elixir_repl
+  @spec get_mode(pid()) :: :normal | :elixir_repl | :mix_task
   def get_mode(pid) do
     GenServer.call(pid, :get_mode)
   end
@@ -165,6 +165,7 @@ defmodule Yeesh.Session do
       case state.mode do
         :normal -> state.prompt
         :elixir_repl -> "iex> "
+        :mix_task -> Map.get(state.context, :mix_prompt, "mix> ")
       end
 
     {:reply, prompt, state}
