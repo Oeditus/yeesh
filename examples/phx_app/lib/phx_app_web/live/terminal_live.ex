@@ -6,7 +6,8 @@ defmodule PhxAppWeb.TerminalLive do
     commands = [
       PhxApp.Commands.Fibonacci,
       PhxApp.Commands.Cowsay,
-      PhxApp.Commands.Sysinfo
+      PhxApp.Commands.Sysinfo,
+      PhxApp.Commands.Quiz
     ]
 
     {:ok, assign(socket, demo_commands: commands)}
@@ -20,9 +21,13 @@ defmodule PhxAppWeb.TerminalLive do
         <div class="text-center space-y-2">
           <h1 class="text-3xl font-bold tracking-tight">Yeesh Demo</h1>
           <p class="text-base-content/60 text-sm">
-            A sandboxed terminal in your browser. Try <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">help</code>, <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">cowsay hello</code>, <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">sysinfo</code>, <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">fib 30</code>, or
+            A sandboxed terminal in your browser. Try <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">help</code>, <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">cowsay hello</code>,
             <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">elixir</code>
-            to enter the Elixir REPL.
+            for the REPL,
+            <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">quiz</code>
+            for an interactive trivia game, or
+            <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">mix phx_app.stats</code>
+            to run a Mix task.
           </p>
         </div>
 
