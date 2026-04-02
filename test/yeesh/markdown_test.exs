@@ -77,9 +77,9 @@ defmodule Yeesh.MarkdownTest do
       """
 
       result = Markdown.render(md)
-      assert result =~ "  ▹ alpha"
-      assert result =~ "  ▹ beta"
-      assert result =~ "  ▹ gamma"
+      assert result =~ "  ▸ alpha"
+      assert result =~ "  ▸ beta"
+      assert result =~ "  ▸ gamma"
     end
 
     test "preserves inline formatting in items" do
@@ -89,7 +89,7 @@ defmodule Yeesh.MarkdownTest do
       """
 
       result = Markdown.render(md)
-      assert result =~ "  ▹ " <> @bold <> "bold" <> @reset <> " item"
+      assert result =~ "  ▸ " <> @bold <> "bold" <> @reset <> " item"
     end
   end
 
@@ -205,8 +205,8 @@ defmodule Yeesh.MarkdownTest do
       result = Markdown.render(md)
       assert result =~ @h1 <> "Title" <> @reset
       assert result =~ "Some intro text."
-      assert result =~ "  ▹ item one"
-      assert result =~ "  ▹ item two"
+      assert result =~ "  ▸ item one"
+      assert result =~ "  ▸ item two"
     end
   end
 end
