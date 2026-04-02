@@ -16,6 +16,7 @@ The terminal at `/` comes with several demo commands:
 | Command | Type | Description |
 |---------|------|-------------|
 | `help` | builtin | List all available commands |
+| `about` | custom command | Project info rendered from Markdown |
 | `cowsay hello` | custom command | ASCII cow with a message |
 | `sysinfo` | custom command | BEAM runtime information |
 | `fib 30` | custom command | Fibonacci calculator |

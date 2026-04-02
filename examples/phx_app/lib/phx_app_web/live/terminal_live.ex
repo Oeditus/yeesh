@@ -4,6 +4,7 @@ defmodule PhxAppWeb.TerminalLive do
   @impl true
   def mount(_params, _session, socket) do
     commands = [
+      PhxApp.Commands.About,
       PhxApp.Commands.Fibonacci,
       PhxApp.Commands.Cowsay,
       PhxApp.Commands.Sysinfo,
@@ -25,7 +26,9 @@ defmodule PhxAppWeb.TerminalLive do
             <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">elixir</code>
             for the REPL,
             <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">quiz</code>
-            for an interactive trivia game, or
+            for an interactive trivia game,
+            <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">about</code>
+            for Markdown rendering, or
             <code class="px-1.5 py-0.5 rounded bg-base-300 text-sm font-mono">mix phx_app.stats</code>
             to run a Mix task.
           </p>
