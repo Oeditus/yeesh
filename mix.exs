@@ -62,7 +62,7 @@ defmodule Yeesh.MixProject do
       {:phoenix_html, "~> 4.0"},
       {:jason, "~> 1.4"},
       {:dune, "~> 0.3"},
-      {:mdex, "~> 0.11"},
+      {:marcli, "~> 0.1"},
 
       # Dev / Test
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
