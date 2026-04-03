@@ -116,7 +116,7 @@ defmodule Yeesh.MixProject do
       main: "readme",
       logo: "stuff/img/logo-48x48.jpg",
       assets: %{"stuff/img" => "assets"},
-      extras: ["README.md", "stuff/mix_tasks.md"],
+      extras: ["README.md", "stuff/mix_tasks.md", "stuff/yeesh_markdown.md"],
       extra_section: "GUIDES",
       source_url: @source_url,
       source_ref: "v#{@version}",
