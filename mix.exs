@@ -79,8 +79,23 @@ defmodule Yeesh.MixProject do
         "format --check-formatted",
         "credo --strict",
         "dialyzer"
-      ]
+      ],
+      "yeesh.setup": &setup/1
     ]
+  end
+
+  defp setup( _) do
+    Mix.Task.run( "copy.js.to.assets")
+    Mix.shell().info( """
+    ✓ YourLibrary JS copied to assets/js/vendor/your_library
+
+    Next steps for the user:
+    1. Add to your mix.exs aliases:
+       "deps.get": ["deps.get", "your_library.setup"]
+
+    2. In assets/js/app.js, import relatively:
+       import "../vendor/your_library/main.js";
+    """)
   end
 
   defp description do
