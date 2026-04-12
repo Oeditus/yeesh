@@ -19,6 +19,8 @@ defmodule Yeesh.Live.TerminalComponent do
     - `:commands` - list of command modules to register (default: `[]`)
     - `:prompt` - prompt string (default: `"$ "`)
     - `:theme` - terminal theme (default: `:default`)
+    - `:welcome_message` - welcome message (default: the Yeesh welcome message)
+    - `:resize_event` - `CustomEvent` name to dispatch on resize to fit if defined (default: nil)
     - `:context` - arbitrary map passed through to commands (default: `%{}`)
     - `:session_opts` - additional session options (default: `[]`)
     - `:sandbox_opts` - Dune sandbox configuration (default: `[]`)
@@ -44,13 +46,19 @@ defmodule Yeesh.Live.TerminalComponent do
   alias Yeesh.{Completion, Executor, Registry, Session}
 
   @impl true
-  def mount(socket) do
-    {:ok, assign(socket, session_pid: nil, commands: [], theme: :default)}
-  end
-
-  @impl true
   def update(assigns, socket) do
     socket = assign(socket, assigns)
+
+    socket =
+      socket
+      |> assign( :final_prompt, get_prompt( socket.assigns))
+      |> assign_new( :session_pid, fn -> nil end)
+      |> assign_new( :commands, fn -> nil end)
+      |> assign_new( :theme, fn -> :default end)
+      |> assign_new( :resize_event, fn -> nil end)
+      |> assign_new( :welcome_message, fn ->
+        "\x1b[1;36mYeesh\x1b[0m - sandboxed terminal (type \x1b[1mhelp\x1b[0m for commands)"
+      end)
 
     socket =
       if socket.assigns[:session_pid] == nil and connected?(socket) do
@@ -81,17 +89,15 @@ defmodule Yeesh.Live.TerminalComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div
+    <yeesh-terminal
       id={@id}
-      phx-hook="YeeshTerminal"
+      theme={@theme}
+      welcome={@welcome_message}
+      prompt={@final_prompt}
+      commands={Jason.encode!(Registry.list())}
+      resize-event={@resize_event}
       phx-update="ignore"
-      phx-target={@myself}
-      data-theme={@theme}
-      data-prompt={get_prompt(assigns)}
-      data-commands={Jason.encode!(Registry.list())}
-      style="width: 100%; height: 100%;"
-    >
-    </div>
+    />
     """
   end
 
