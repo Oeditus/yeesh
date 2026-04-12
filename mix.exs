@@ -2,7 +2,7 @@ defmodule Yeesh.MixProject do
   use Mix.Project
 
   @app :yeesh
-  @version "0.5.0"
+  @version "0.5.1"
   @source_url "https://github.com/Oeditus/yeesh"
 
   def project do
@@ -62,7 +62,7 @@ defmodule Yeesh.MixProject do
       {:phoenix_html, "~> 4.0"},
       {:jason, "~> 1.4"},
       {:dune, "~> 0.3"},
-      {:marcli, "~> 0.1"},
+      {:marcli, "~> 0.3", optional: true},
 
       # Dev / Test
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
