@@ -97,6 +97,7 @@ defmodule Yeesh.Live.TerminalComponent do
       commands={Jason.encode!(Registry.list())}
       resize-event={@resize_event}
       phx-update="ignore"
+      phx-target={@myself}
     />
     """
   end
