@@ -261,7 +261,7 @@ export default class YeeshTerminalElement extends LitElement {
       this.searchQuery += text.replace(/[\r\n]+/g, " ").replace(/[\x00-\x1f\x7f]/g, "");
       this.searchSkip = 0;
       if (this.searchQuery.length > 0) {
-        this.pushEventTo(this.el, "yeesh:history_search", {
+        this.hook.pushEventTo(this, "yeesh:history_search", {
           query: this.searchQuery,
           skip: 0,
         });
@@ -385,7 +385,7 @@ function interceptKeys( event, host) {
       if (host.searchMode) host.exitSearchMode(true);
       if (host.historyPrefix === null)
         host.historyPrefix = host.inputBuffer;
-      host.hook.pushEventTo(host.el, "yeesh:history_prev", {
+      host.hook.pushEventTo(host, "yeesh:history_prev", {
         prefix: host.historyPrefix,
       });
       return false;
@@ -395,7 +395,7 @@ function interceptKeys( event, host) {
       if (host.searchMode) host.exitSearchMode(true);
       if (host.historyPrefix === null)
         host.historyPrefix = host.inputBuffer;
-      host.hook.pushEventTo(host.el, "yeesh:history_next", {
+      host.hook.pushEventTo(host, "yeesh:history_next", {
         prefix: host.historyPrefix,
       });
       return false;
@@ -409,7 +409,7 @@ function interceptKeys( event, host) {
       host.enterSearchMode();
     } else {
       host.searchSkip++;
-      host.hook.pushEventTo(host.el, "yeesh:history_search", {
+      host.hook.pushEventTo(host, "yeesh:history_search", {
         query: host.searchQuery,
         skip: host.searchSkip,
       });
@@ -422,7 +422,7 @@ function interceptKeys( event, host) {
     event.preventDefault();
     if (host.searchMode) host.exitSearchMode(true);
     if (host.historyPrefix === null) host.historyPrefix = host.inputBuffer;
-    host.hook.pushEventTo(host.el, "yeesh:history_prev", {
+    host.hook.pushEventTo(host, "yeesh:history_prev", {
       prefix: host.historyPrefix,
     });
     return false;
@@ -431,7 +431,7 @@ function interceptKeys( event, host) {
     event.preventDefault();
     if (host.searchMode) host.exitSearchMode(true);
     if (host.historyPrefix === null) host.historyPrefix = host.inputBuffer;
-    host.hook.pushEventTo(host.el, "yeesh:history_next", {
+    host.hook.pushEventTo(host, "yeesh:history_next", {
       prefix: host.historyPrefix,
     });
     return false;
@@ -456,7 +456,7 @@ function interceptKeys( event, host) {
       host.cursorPos = 0;
       host.historyPrefix = null;
       if (input.trim().length > 0) {
-        host.hook.pushEventTo(host.el, "yeesh:input", { input });
+        host.hook.pushEventTo(host, "yeesh:input", { input });
       } else {
         host.writePrompt();
       }
@@ -480,7 +480,7 @@ function interceptKeys( event, host) {
       host.inputBuffer = "";
       host.cursorPos = 0;
       host.historyPrefix = null;
-      host.hook.pushEventTo(host.el, "yeesh:interrupt", {});
+      host.hook.pushEventTo(host, "yeesh:interrupt", {});
       host.writePrompt();
       return false;
     }
@@ -491,7 +491,7 @@ function interceptKeys( event, host) {
         host.searchQuery = host.searchQuery.slice(0, -1);
         host.searchSkip = 0;
         if (host.searchQuery.length > 0) {
-          host.hook.pushEventTo(host.el, "yeesh:history_search", {
+          host.hook.pushEventTo(host, "yeesh:history_search", {
             query: host.searchQuery,
             skip: 0,
           });
@@ -515,7 +515,7 @@ function interceptKeys( event, host) {
     ) {
       host.searchQuery += event.key;
       host.searchSkip = 0;
-      host.hook.pushEventTo(host.el, "yeesh:history_search", {
+      host.hook.pushEventTo(host, "yeesh:history_search", {
         query: host.searchQuery,
         skip: 0,
       });
@@ -529,14 +529,14 @@ function interceptKeys( event, host) {
   // --- Normal mode: arrow key history navigation ---
   if (event.key === "ArrowUp") {
     if (host.historyPrefix === null) host.historyPrefix = host.inputBuffer;
-    host.hook.pushEventTo(host.el, "yeesh:history_prev", {
+    host.hook.pushEventTo(host, "yeesh:history_prev", {
       prefix: host.historyPrefix,
     });
     return false;
   }
   if (event.key === "ArrowDown") {
     if (host.historyPrefix === null) host.historyPrefix = host.inputBuffer;
-    host.hook.pushEventTo(host.el, "yeesh:history_next", {
+    host.hook.pushEventTo(host, "yeesh:history_next", {
       prefix: host.historyPrefix,
     });
     return false;
