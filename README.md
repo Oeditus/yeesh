@@ -69,8 +69,44 @@ Add the terminal component to any LiveView:
 />
 ```
 
-This gives you a working terminal with all built-in commands: `help`, `clear`,
-`history`, `echo`, `env`, and `elixir` (sandboxed REPL).
+By default, only the `help` built-in command is registered.
+
+## Built-in Commands
+
+Yeesh ships with several built-in commands: `help`, `clear`, `history`, `echo`,
+`env`, and `elixir` (sandboxed REPL). The `:builtins` assign controls which of
+these are available:
+
+| Value | Effect |
+|---|---|
+| `:help` (default) | Only the `help` command |
+| `:all` | All built-in commands |
+| `:none` | No built-in commands at all |
+| list of modules | Exactly those modules |
+
+```elixir
+<%!-- All built-ins --%>
+<.live_component
+  module={Yeesh.Live.TerminalComponent}
+  id="terminal"
+  builtins={:all}
+/>
+
+<%!-- Only help + history --%>
+<.live_component
+  module={Yeesh.Live.TerminalComponent}
+  id="terminal"
+  builtins={[Yeesh.Builtin.Help, Yeesh.Builtin.History]}
+/>
+
+<%!-- No built-ins at all --%>
+<.live_component
+  module={Yeesh.Live.TerminalComponent}
+  id="terminal"
+  builtins={:none}
+  commands={[MyApp.Commands.Status]}
+/>
+```
 
 ## Custom Commands
 
@@ -105,8 +141,42 @@ Register it in the component:
 <.live_component
   module={Yeesh.Live.TerminalComponent}
   id="terminal"
+  builtins={:all}
   commands={[MyApp.Commands.Deploy]}
 />
+```
+
+## Command Grouping
+
+The `help` command groups output automatically based on command names.
+Command names may contain dots (`.`), dashes (`-`), and underscores (`_`) as
+separators. The text before the first separator determines the group:
+
+- **Built-in commands** are always grouped under "Built-in".
+- **Commands without a separator** (e.g. `deploy`) appear under "Generic".
+- **Commands with a separator** are grouped by their prefix, capitalized.
+  For example, `db.migrate`, `db-seed`, and `db_status` all appear under "Db".
+
+Groups are displayed in order: Built-in first, Generic second, then custom
+groups alphabetically.
+
+Example `help` output with mixed commands:
+
+```
+Built-in:
+  help            Show available commands or help for a specific command
+  clear           Clear the terminal screen
+
+Generic:
+  deploy          Deploy the application
+
+Db:
+  db.migrate      Run database migrations
+  db.seed         Seed the database
+
+Sys:
+  sys.info        Show system information
+  sys.health      Run health checks
 ```
 
 ## Elixir REPL
@@ -145,6 +215,8 @@ Configure the sandbox:
 
 - `:prompt` -- prompt string (default: `"$ "`)
 - `:commands` -- list of command modules (default: `[]`)
+- `:builtins` -- which built-in commands to register: `:all`, `:none`, `:help`,
+  or a list of builtin modules (default: `:help`)
 - `:theme` -- terminal theme, `:default` or `:light` (default: `:default`)
 - `:context` -- arbitrary map passed to commands (default: `%{}`)
 - `:sandbox_opts` -- Dune sandbox configuration (default: `[]`)

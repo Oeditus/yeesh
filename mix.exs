@@ -2,7 +2,7 @@ defmodule Yeesh.MixProject do
   use Mix.Project
 
   @app :yeesh
-  @version "0.5.1"
+  @version "0.6.0"
   @source_url "https://github.com/Oeditus/yeesh"
 
   def project do

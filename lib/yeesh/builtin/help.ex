@@ -1,5 +1,23 @@
 defmodule Yeesh.Builtin.Help do
-  @moduledoc false
+  @moduledoc """
+  Built-in `help` command.
+
+  When invoked without arguments, lists all registered commands grouped by
+  name prefix:
+
+    - Built-in commands (from `Yeesh.Registry.builtin_commands/0`) are
+      grouped under **"Built-in"**.
+    - Consumer commands whose name contains no separator (`.`, `-`, `_`)
+      are grouped under **"Generic"**.
+    - Consumer commands with a separator are grouped by the text before
+      the first separator, capitalized (e.g. `db.migrate` -> **"Db"**).
+
+  Groups are sorted: Built-in first, Generic second, then custom groups
+  alphabetically.
+
+  When invoked with a command name (`help <command>`), shows its description
+  and usage.
+  """
   @behaviour Yeesh.Command
 
   alias Yeesh.{Output, Registry}
