@@ -43,6 +43,7 @@ defmodule PhxAppWeb.TerminalLive do
             module={Yeesh.Live.TerminalComponent}
             id="yeesh-demo"
             commands={@demo_commands}
+            builtins={:all}
             prompt="yeesh> "
             theme={:default}
           />

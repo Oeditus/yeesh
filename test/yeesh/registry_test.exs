@@ -4,14 +4,14 @@ defmodule Yeesh.RegistryTest do
   alias Yeesh.Registry
 
   describe "built-in commands" do
-    test "registers all built-in commands on start" do
+    setup do
+      Registry.reset()
+      :ok
+    end
+
+    test "registers only help by default on start" do
       commands = Registry.list()
-      assert "help" in commands
-      assert "clear" in commands
-      assert "history" in commands
-      assert "echo" in commands
-      assert "env" in commands
-      assert "elixir" in commands
+      assert ["help"] = commands
     end
 
     test "list returns sorted command names" do
@@ -20,9 +20,34 @@ defmodule Yeesh.RegistryTest do
     end
   end
 
+  describe "resolve_builtins/1" do
+    test ":all returns all builtin modules" do
+      modules = Registry.resolve_builtins(:all)
+      assert Yeesh.Builtin.Help in modules
+      assert Yeesh.Builtin.Clear in modules
+      assert Yeesh.Builtin.History in modules
+      assert Yeesh.Builtin.Echo in modules
+      assert Yeesh.Builtin.Env in modules
+      assert Yeesh.Builtin.ElixirEval in modules
+    end
+
+    test ":none returns an empty list" do
+      assert [] = Registry.resolve_builtins(:none)
+    end
+
+    test ":help returns only the Help module" do
+      assert [Yeesh.Builtin.Help] = Registry.resolve_builtins(:help)
+    end
+
+    test "a list of modules is returned as-is" do
+      modules = [Yeesh.Builtin.Echo, Yeesh.Builtin.Env]
+      assert ^modules = Registry.resolve_builtins(modules)
+    end
+  end
+
   describe "lookup/1" do
     test "finds registered command" do
-      assert {:ok, Yeesh.Builtin.Echo} = Registry.lookup("echo")
+      assert {:ok, Yeesh.Builtin.Help} = Registry.lookup("help")
     end
 
     test "returns :error for unknown command" do
@@ -32,6 +57,7 @@ defmodule Yeesh.RegistryTest do
 
   describe "completions_for/1" do
     test "returns matching command names" do
+      Registry.register_all(Registry.resolve_builtins(:all))
       matches = Registry.completions_for("e")
       assert "echo" in matches
       assert "elixir" in matches

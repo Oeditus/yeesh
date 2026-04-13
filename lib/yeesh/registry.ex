@@ -2,9 +2,12 @@ defmodule Yeesh.Registry do
   @moduledoc """
   ETS-backed command registry.
 
-  Stores command modules keyed by their name. Built-in commands are
-  registered automatically on application start. Consumer commands
-  are registered when the terminal component mounts.
+  Stores command modules keyed by their name. Only the `help` built-in
+  is registered on application start. Additional built-ins are registered
+  when the terminal component mounts according to the `:builtins` option
+  (defaults to `:help`). Consumer commands are also registered on mount.
+
+  See `resolve_builtins/1` for the accepted values of `:builtins`.
   """
 
   use GenServer
@@ -19,6 +22,8 @@ defmodule Yeesh.Registry do
     Yeesh.Builtin.Env,
     Yeesh.Builtin.ElixirEval
   ]
+
+  @type builtins_opt :: :all | :none | :help | [module()]
 
   # Client API
 
@@ -73,20 +78,45 @@ defmodule Yeesh.Registry do
     |> Enum.filter(&String.starts_with?(&1, prefix))
   end
 
+  @doc "Clears the registry and re-registers only the default builtins (`:help`)."
+  @spec reset :: :ok
+  def reset do
+    :ets.delete_all_objects(@table)
+    register_all(resolve_builtins(:help))
+  end
+
   @doc "Returns the list of built-in command modules."
   @spec builtin_commands :: [module()]
   def builtin_commands, do: @builtin_commands
+
+  @doc """
+  Resolves a builtins option into a list of command modules.
+
+  Accepted values:
+
+    - `:all`  -- all built-in commands
+    - `:none` -- no built-in commands
+    - `:help` -- only the `help` command (default)
+    - a list of command modules -- those exact modules
+  """
+  @spec resolve_builtins(builtins_opt()) :: [module()]
+  def resolve_builtins(:all), do: @builtin_commands ++ mix_commands()
+  def resolve_builtins(:none), do: []
+  def resolve_builtins(:help), do: [Yeesh.Builtin.Help]
+  def resolve_builtins(modules) when is_list(modules), do: modules
 
   # Server callbacks
 
   @impl true
   def init(_opts) do
     table = :ets.new(@table, [:named_table, :set, :public, read_concurrency: true])
-    register_all(@builtin_commands ++ mix_commands())
+    register_all(resolve_builtins(:help))
     {:ok, table}
   end
 
-  defp mix_commands do
+  @doc false
+  @spec mix_commands :: [module()]
+  def mix_commands do
     if Application.get_env(:yeesh, :enable_mix_command, false) &&
          Code.ensure_loaded?(Yeesh.Builtin.MixTask) do
       [Yeesh.Builtin.MixTask]

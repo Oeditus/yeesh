@@ -4,6 +4,7 @@ defmodule Yeesh.MixTaskIntegrationTest do
   alias Yeesh.{Executor, Session}
 
   setup do
+    Yeesh.Registry.register_all(Yeesh.Registry.resolve_builtins(:all))
     {:ok, pid} = Session.start_link(prompt: "$ ")
     %{session_pid: pid}
   end

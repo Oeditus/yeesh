@@ -17,6 +17,8 @@ defmodule Yeesh.Live.TerminalComponent do
 
     - `:id` (required) - unique identifier for this terminal instance
     - `:commands` - list of command modules to register (default: `[]`)
+    - `:builtins` - which built-in commands to register (default: `:help`).
+      Accepted values: `:all`, `:none`, `:help`, or a list of builtin modules.
     - `:prompt` - prompt string (default: `"$ "`)
     - `:theme` - terminal theme (default: `:default`)
     - `:context` - arbitrary map passed through to commands (default: `%{}`)
@@ -66,9 +68,10 @@ defmodule Yeesh.Live.TerminalComponent do
 
         {:ok, pid} = Session.start(session_opts)
 
-        # Register consumer commands
+        # Register builtins and consumer commands
+        builtins = Registry.resolve_builtins(assigns[:builtins] || :help)
         commands = assigns[:commands] || []
-        Registry.register_all(commands)
+        Registry.register_all(builtins ++ commands)
 
         assign(socket, session_pid: pid)
       else

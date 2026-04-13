@@ -26,6 +26,11 @@ defmodule Yeesh.CompletionTest do
   end
 
   describe "complete/3" do
+    setup do
+      Yeesh.Registry.register_all(Yeesh.Registry.resolve_builtins(:all))
+      :ok
+    end
+
     test "completes command names from registry" do
       session = %Yeesh.Session{}
       {matches, _replacement} = Completion.complete("e", 1, session)
