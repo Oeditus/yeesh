@@ -18,20 +18,25 @@ defmodule Yeesh.Builtin.Help do
     Registry.completions_for(partial)
   end
 
+  @separator_pattern ~r/[.\-_]/
+
   @impl true
   def execute([], session) do
-    commands = Registry.list_all()
+    groups =
+      Registry.list_all()
+      |> Enum.group_by(&group_key/1)
+      |> Enum.sort_by(fn {key, _} -> group_sort_key(key) end)
 
     output =
-      Enum.map_join(commands, "\r\n", fn {cmd_name, module} ->
-        padded = String.pad_trailing(cmd_name, 16)
-        Output.green(padded) <> module.description()
+      Enum.map_join(groups, "\r\n\r\n", fn {group_name, commands} ->
+        header = Output.bold(Output.underline(group_name <> ":"))
+        lines = format_commands(commands)
+        header <> "\r\n" <> lines
       end)
 
-    header = Output.bold("Available commands:") <> "\r\n\r\n"
     footer = "\r\n\r\n" <> Output.dim("Type 'help <command>' for detailed usage.")
 
-    {:ok, header <> output <> footer, session}
+    {:ok, output <> footer, session}
   end
 
   def execute([cmd_name], session) do
@@ -53,5 +58,32 @@ defmodule Yeesh.Builtin.Help do
 
   def execute(_args, session) do
     {:error, "usage: help [command]", session}
+  end
+
+  defp group_key({_name, module}) do
+    if builtin?(module) do
+      "Built-in"
+    else
+      case Regex.split(@separator_pattern, module.name(), parts: 2) do
+        [_single] -> "Generic"
+        [prefix | _] -> String.capitalize(prefix)
+      end
+    end
+  end
+
+  defp builtin?(module) do
+    module in Registry.builtin_commands()
+  end
+
+  # Sort: "Built-in" first, "Generic" second, then alphabetical
+  defp group_sort_key("Built-in"), do: {0, ""}
+  defp group_sort_key("Generic"), do: {1, ""}
+  defp group_sort_key(name), do: {2, name}
+
+  defp format_commands(commands) do
+    Enum.map_join(commands, "\r\n", fn {cmd_name, module} ->
+      padded = String.pad_trailing(cmd_name, 16)
+      "  " <> Output.green(padded) <> module.description()
+    end)
   end
 end

@@ -87,7 +87,7 @@ defmodule Yeesh.Registry do
 
   @doc "Returns the list of built-in command modules."
   @spec builtin_commands :: [module()]
-  def builtin_commands, do: @builtin_commands
+  def builtin_commands, do: @builtin_commands ++ mix_commands()
 
   @doc """
   Resolves a builtins option into a list of command modules.
