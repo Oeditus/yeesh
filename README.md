@@ -47,12 +47,6 @@ import "phoenix-colocated/yeesh"
 Insert the import line high above in the `app.js`, ideally immediately after the
 `import {LiveSocket} from "phoenix_live_view"` line.
 
-Import the xterm CSS stylesheet into your `app.css`:
-
-```CSS
-@import "xterm.css";
-```
-
 ## Quick Start
 
 Add the terminal component to any LiveView:
