@@ -50,9 +50,9 @@ defmodule Yeesh.Builtin.Help do
 
     output =
       Enum.map_join(groups, "\r\n\r\n", fn {group_name, commands} ->
-        header = Output.bold(Output.underline(group_name <> ":"))
+        header = Output.bold(Output.underline(group_name))
         lines = format_commands(commands)
-        header <> "\r\n" <> lines
+        header <> ":\r\n" <> lines
       end)
 
     footer = "\r\n\r\n" <> Output.dim("Type 'help <command>' for detailed usage.")

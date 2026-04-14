@@ -12,7 +12,7 @@ defmodule Yeesh.Builtin.HelpTest do
     test "groups builtin commands under Built-in" do
       Registry.register_all(Registry.resolve_builtins(:all))
       {:ok, output, _session} = Help.execute([], %Session{})
-      assert output =~ "Built-in:"
+      assert output =~ "Built-in"
       assert output =~ "help"
       assert output =~ "clear"
     end
@@ -28,7 +28,7 @@ defmodule Yeesh.Builtin.HelpTest do
 
       Registry.register(PlainCmd)
       {:ok, output, _session} = Help.execute([], %Session{})
-      assert output =~ "Generic:"
+      assert output =~ "Generic"
       assert output =~ "deploy"
     end
 
@@ -43,7 +43,7 @@ defmodule Yeesh.Builtin.HelpTest do
 
       Registry.register(DottedCmd)
       {:ok, output, _session} = Help.execute([], %Session{})
-      assert output =~ "Sys:"
+      assert output =~ "Sys"
     end
 
     test "groups dashed commands by prefix" do
@@ -57,7 +57,7 @@ defmodule Yeesh.Builtin.HelpTest do
 
       Registry.register(DashedCmd)
       {:ok, output, _session} = Help.execute([], %Session{})
-      assert output =~ "Db:"
+      assert output =~ "Db"
     end
 
     test "groups underscored commands by prefix" do
@@ -71,7 +71,7 @@ defmodule Yeesh.Builtin.HelpTest do
 
       Registry.register(UnderscoredCmd)
       {:ok, output, _session} = Help.execute([], %Session{})
-      assert output =~ "Cache:"
+      assert output =~ "Cache"
     end
 
     test "Built-in group appears before Generic and custom groups" do
@@ -87,8 +87,8 @@ defmodule Yeesh.Builtin.HelpTest do
       Registry.register(SortTestCmd)
       {:ok, output, _session} = Help.execute([], %Session{})
 
-      builtin_pos = :binary.match(output, "Built-in:") |> elem(0)
-      zulu_pos = :binary.match(output, "Zulu:") |> elem(0)
+      builtin_pos = :binary.match(output, "Built-in") |> elem(0)
+      zulu_pos = :binary.match(output, "Zulu") |> elem(0)
       assert builtin_pos < zulu_pos
     end
 
@@ -104,15 +104,15 @@ defmodule Yeesh.Builtin.HelpTest do
 
       Registry.register(CustomGroupCmd)
       {:ok, output, _session} = Help.execute([], %Session{})
-      assert output =~ "Database:"
-      refute output =~ "Db:"
+      assert output =~ "Database"
+      refute output =~ "Db"
     end
 
     test "group/0 callback does not affect builtin classification" do
       # Builtins are always "Built-in" regardless of group/0
       Registry.register_all(Registry.resolve_builtins(:all))
       {:ok, output, _session} = Help.execute([], %Session{})
-      assert output =~ "Built-in:"
+      assert output =~ "Built-in"
       assert output =~ "help"
     end
   end
