@@ -32,10 +32,17 @@ def deps do
 end
 ```
 
-Install the JavaScript dependencies:
+Install the library, but do not compile it yet:
+
+```
+mix deps.get
+```
+
+Install the JavaScript dependencies into the library, then compile the library:
 
 ```bash
-npm install --prefix assets @xterm/xterm @xterm/addon-fit @xterm/addon-web-links lit
+npm install --prefix deps/yeesh/assets
+mix deps.compile yeesh
 ```
 
 Import the Yeesh terminal web component into your `app.js`:
