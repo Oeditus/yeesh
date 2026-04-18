@@ -44,7 +44,16 @@ defmodule Yeesh.Executor do
 
   defp execute_normal(input, session, session_pid) do
     case tokenize(input) do
-      {:ok, [command_name | args]} ->
+      {:ok, []} ->
+        {"", session}
+
+      {:ok, [first | rest] = tokens} ->
+        {command_name, args} =
+          case Registry.match_command(tokens) do
+            {:ok, name, remaining} -> {name, remaining}
+            :error -> {first, rest}
+          end
+
         dispatch(command_name, args, session, session_pid)
 
       {:error, reason} ->
@@ -216,12 +225,14 @@ defmodule Yeesh.Executor do
     do_tokenize(rest, tokens, current, nil)
   end
 
-  # Space outside quotes = token separator
-  defp do_tokenize(<<" ", rest::binary>>, tokens, "", nil) do
+  # Whitespace outside quotes = token separator. Runs of whitespace
+  # collapse into a single separator; leading/trailing whitespace is
+  # dropped entirely.
+  defp do_tokenize(<<c, rest::binary>>, tokens, "", nil) when c in [?\s, ?\t] do
     do_tokenize(rest, tokens, "", nil)
   end
 
-  defp do_tokenize(<<" ", rest::binary>>, tokens, current, nil) do
+  defp do_tokenize(<<c, rest::binary>>, tokens, current, nil) when c in [?\s, ?\t] do
     do_tokenize(rest, [current | tokens], "", nil)
   end
 

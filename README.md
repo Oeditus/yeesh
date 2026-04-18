@@ -12,7 +12,8 @@ command history, prompt customization) and Dune-powered sandboxed Elixir evaluat
 - **xterm.js-powered terminal** -- full terminal emulation in the browser with
   GPU-accelerated rendering, ANSI colors, scrollback, selection, and web links
 - **Command behaviour** -- define custom commands with a simple behaviour
-- **Tab completion** -- command name completion out of the box
+- **Tab completion** -- command name completion out of the box, including
+  multi-word command names
 - **Command history** -- up/down arrow navigation through previous commands
 - **Sandboxed Elixir REPL** -- evaluate Elixir code safely via Dune, with
   configurable allowlists, memory/reduction limits, and atom leak prevention
@@ -150,6 +151,45 @@ Register it in the component:
   commands={[MyApp.Commands.Deploy]}
 />
 ```
+
+### Multi-word command names
+
+A command name may contain whitespace, in which case the command is invoked
+by typing all of its words in order. Any run of whitespace -- whether in the
+name returned by `name/0` or in the user's input -- is treated as a single
+separator, and leading/trailing whitespace is ignored:
+
+```elixir
+defmodule MyApp.Commands.MixRun do
+  @behaviour Yeesh.Command
+
+  @impl true
+  def name, do: "mix run"
+
+  @impl true
+  def description, do: "Run a Mix task"
+
+  @impl true
+  def usage, do: "mix run <task> [args...]"
+
+  @impl true
+  def execute([task | args], session) do
+    {:ok, "running #{task} with #{inspect(args)}", session}
+  end
+end
+```
+
+```
+$ mix run my_task arg1 arg2
+running my_task with ["arg1", "arg2"]
+```
+
+When dispatching, the registry is consulted first and the **longest**
+registered multi-word name that matches a prefix of the input wins. So if
+both `mix` and `mix run` are registered, `mix run foo` dispatches to
+`mix run` with `["foo"]`, while `mix foo` dispatches to `mix` with
+`["foo"]`. Quoting still works the usual way for individual arguments,
+e.g. `mix run "hello world"`.
 
 ## Command Grouping
 
