@@ -11,30 +11,40 @@ defmodule Yeesh.Completion do
   @doc """
   Returns completions for the given input and cursor position.
 
-  If the input contains no spaces, completes command names.
-  If the input contains spaces, delegates to the command's
+  Command names may be multi-word (e.g. `"mix run"`), so the prefix
+  matched against the registry may itself contain spaces. Internal
+  runs of whitespace in the input are collapsed to a single space
+  before matching so that `"mix   ru"` and `"mix ru"` behave alike.
+
+  If no registered command starts with the (normalized) prefix and
+  the input contains a space, delegate to the command's
   `completions/2` callback (if implemented).
   """
   @spec complete(String.t(), non_neg_integer(), Yeesh.Session.t()) ::
           {[String.t()], String.t()}
   def complete(input, _cursor_pos, _session) do
-    trimmed = String.trim_leading(input)
+    normalized = normalize_prefix(input)
 
-    if String.contains?(trimmed, " ") do
-      complete_args(trimmed)
-    else
-      complete_command(trimmed)
+    case Registry.completions_for(normalized) do
+      [] ->
+        if String.contains?(normalized, " ") do
+          complete_args(normalized)
+        else
+          {[], normalized}
+        end
+
+      [single] ->
+        {[], single <> " "}
+
+      multiple ->
+        {multiple, common_prefix(multiple)}
     end
   end
 
-  defp complete_command(prefix) do
-    matches = Registry.completions_for(prefix)
-
-    case matches do
-      [] -> {[], prefix}
-      [single] -> {[], single <> " "}
-      multiple -> {multiple, common_prefix(multiple)}
-    end
+  defp normalize_prefix(input) do
+    input
+    |> String.trim_leading()
+    |> String.replace(~r/[ \t]+/, " ")
   end
 
   defp complete_args(input) do

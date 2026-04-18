@@ -36,7 +36,7 @@ defmodule Yeesh.Registry do
   @doc "Registers a command module."
   @spec register(module()) :: :ok
   def register(command_module) do
-    name = command_module.name()
+    name = normalize_name(command_module.name())
     :ets.insert(@table, {name, command_module})
     :ok
   end
@@ -50,10 +50,52 @@ defmodule Yeesh.Registry do
   @doc "Looks up a command module by name."
   @spec lookup(String.t()) :: {:ok, module()} | :error
   def lookup(name) do
-    case :ets.lookup(@table, name) do
-      [{^name, module}] -> {:ok, module}
+    normalized = normalize_name(name)
+
+    case :ets.lookup(@table, normalized) do
+      [{^normalized, module}] -> {:ok, module}
       [] -> :error
     end
+  end
+
+  @doc """
+  Normalizes a command name: trims outer whitespace and collapses any
+  run of internal whitespace into a single space.
+  """
+  @spec normalize_name(String.t()) :: String.t()
+  def normalize_name(name) do
+    name
+    |> String.trim()
+    |> String.replace(~r/\s+/, " ")
+  end
+
+  @doc """
+  Finds the longest registered command that matches a prefix of the given
+  tokens. Returns `{:ok, command_name, remaining_args}` if any registered
+  command matches, otherwise `:error`.
+
+  Used by the executor to resolve multi-word commands after tokenization.
+  """
+  @spec match_command([String.t()]) :: {:ok, String.t(), [String.t()]} | :error
+  def match_command([]), do: :error
+
+  def match_command(tokens) when is_list(tokens) do
+    do_match_command(tokens, [], :error)
+  end
+
+  defp do_match_command([], _acc, best), do: best
+
+  defp do_match_command([token | rest], acc, best) do
+    candidate_tokens = acc + [token]
+    candidate = Enum.join(candidate_tokens, " ")
+
+    new_best =
+      case :ets.lookup(@table, candidate) do
+        [{^candidate, _module}] -> {:ok, candidate, rest}
+        [] -> best
+      end
+
+    do_match_command(rest, candidate_tokens, new_best)
   end
 
   @doc "Returns all registered command names."

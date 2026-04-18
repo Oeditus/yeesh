@@ -83,4 +83,67 @@ defmodule Yeesh.RegistryTest do
       assert {:ok, TestCommand} = Registry.lookup("test_registry_cmd")
     end
   end
+
+  describe "normalize_name/1" do
+    test "trims leading and trailing whitespace" do
+      assert "foo" = Registry.normalize_name("  foo  ")
+    end
+
+    test "collapses runs of internal whitespace" do
+      assert "foo bar baz" = Registry.normalize_name("foo   bar\t\tbaz")
+    end
+
+    test "combines both" do
+      assert "mix run" = Registry.normalize_name("\t  mix  \t run\t")
+    end
+  end
+
+  describe "multi-word commands" do
+    defmodule MultiWordCmd do
+      @behaviour Yeesh.Command
+      def name, do: "  deploy   now  "
+      def description, do: "multi"
+      def usage, do: "deploy now"
+      def execute(_args, session), do: {:ok, "", session}
+    end
+
+    defmodule LongerCmd do
+      @behaviour Yeesh.Command
+      def name, do: "deploy now staging"
+      def description, do: "longer"
+      def usage, do: "deploy now staging"
+      def execute(_args, session), do: {:ok, "", session}
+    end
+
+    setup do
+      Registry.reset()
+      :ok
+    end
+
+    test "name is normalized on registration and lookup works with irregular whitespace" do
+      Registry.register(MultiWordCmd)
+      assert "deploy now" in Registry.list()
+      assert {:ok, MultiWordCmd} = Registry.lookup("deploy now")
+      assert {:ok, MultiWordCmd} = Registry.lookup("  deploy  now  ")
+    end
+
+    test "match_command returns longest registered match" do
+      Registry.register(MultiWordCmd)
+      Registry.register(LongerCmd)
+
+      assert {:ok, "deploy now", ["extra"]} =
+               Registry.match_command(["deploy", "now", "extra"])
+
+      assert {:ok, "deploy now staging", []} =
+               Registry.match_command(["deploy", "now", "staging"])
+
+      assert {:ok, "deploy now staging", ["v2"]} =
+               Registry.match_command(["deploy", "now", "staging", "v2"])
+    end
+
+    test "match_command returns :error when no prefix matches" do
+      assert :error = Registry.match_command(["nope"])
+      assert :error = Registry.match_command([])
+    end
+  end
 end

@@ -60,7 +60,9 @@ defmodule Yeesh.Builtin.Help do
     {:ok, output <> footer, session}
   end
 
-  def execute([cmd_name], session) do
+  def execute([_ | _] = args, session) do
+    cmd_name = Enum.join(args, " ")
+
     case Registry.lookup(cmd_name) do
       {:ok, module} ->
         output =
@@ -75,10 +77,6 @@ defmodule Yeesh.Builtin.Help do
       :error ->
         {:error, "unknown command: #{cmd_name}", session}
     end
-  end
-
-  def execute(_args, session) do
-    {:error, "usage: help [command]", session}
   end
 
   defp group_key({_name, module}) do
