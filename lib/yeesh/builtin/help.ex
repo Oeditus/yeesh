@@ -60,7 +60,7 @@ defmodule Yeesh.Builtin.Help do
     {:ok, output <> footer, session}
   end
 
-  def execute(args, session) when is_list(args) and args != [] do
+  def execute([_ | _] = args, session) do
     cmd_name = Enum.join(args, " ")
 
     case Registry.lookup(cmd_name) do
