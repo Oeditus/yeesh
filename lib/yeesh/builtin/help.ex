@@ -105,8 +105,15 @@ defmodule Yeesh.Builtin.Help do
   defp group_sort_key(name), do: {2, name}
 
   defp format_commands(commands) do
+    width =
+      commands
+      |> Enum.map(fn {cmd_name, _} -> String.length(cmd_name) end)
+      |> Enum.max()
+      |> max(14)
+      |> Kernel.+(2)
+
     Enum.map_join(commands, "\r\n", fn {cmd_name, module} ->
-      padded = String.pad_trailing(cmd_name, 16)
+      padded = String.pad_trailing(cmd_name, width)
       "  " <> Output.green(padded) <> module.description()
     end)
   end

@@ -116,4 +116,22 @@ defmodule Yeesh.Builtin.HelpTest do
       assert output =~ "help"
     end
   end
+
+  describe "execute/2 formatting" do
+    test "long command names are not glued to their description" do
+      defmodule LongNameCmd do
+        @behaviour Yeesh.Command
+        def name, do: "very-long-command"
+        def description, do: "Does something"
+        def usage, do: "very-long-command"
+        def group, do: "Test"
+        def execute(_args, session), do: {:ok, "", session}
+      end
+
+      Registry.register(LongNameCmd)
+      {:ok, output, _session} = Help.execute([], %Session{})
+
+      refute output =~ "very-long-commandDoes something"
+    end
+  end
 end
