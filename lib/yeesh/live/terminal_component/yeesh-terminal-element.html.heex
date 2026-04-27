@@ -109,6 +109,14 @@
       this.#deinitTerm();
     }
 
+    focus( options) {
+      if( this.term) {
+        this.term.focus();
+        return;
+      }
+      this.updateComplete.then(() => this.term?.focus());
+    }
+
     // Initializers, deinitialziers
 
     #initTheme() {
