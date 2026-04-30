@@ -535,6 +535,29 @@
       return false;
     }
 
+    // --- Normal mode: arrow key word navigation ---
+    if( event.ctrlKey && !event.shiftKey && !event.altKey &&
+      ( event.key === "ArrowLeft" || event.key === "ArrowRight")
+    ) {
+      event.preventDefault();
+      const buf = host.inputBuffer;
+      const isWord = c => /[A-Za-z0-9]/.test( c);
+      let pos = host.cursorPos;
+      if( event.key === "ArrowLeft") {
+        while( pos > 0 && !isWord( buf[ pos - 1])) pos--;
+        while( pos > 0 &&  isWord( buf[ pos - 1])) pos--;
+        const n = host.cursorPos - pos;
+        if( n > 0) host.term.write("\x1b[" + n + "D");
+      } else {
+        while( pos < buf.length && !isWord( buf[ pos])) pos++;
+        while( pos < buf.length &&  isWord( buf[ pos])) pos++;
+        const n = pos - host.cursorPos;
+        if( n > 0) host.term.write( "\x1b[" + n + "C");
+      }
+      host.cursorPos = pos;
+      return false;
+    }
+
     // --- Normal mode: arrow key history navigation ---
     if (event.key === "ArrowUp") {
       if (host.historyPrefix === null) host.historyPrefix = host.inputBuffer;
